@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:pokemon_picture_book/model/pokemonimage/pokemonimage.dart';
+import 'package:pokemon_picture_book/model/name/name.dart';
 
 void main() {
   runApp(const MyApp());
@@ -27,17 +28,24 @@ class PokemonPictureBook extends StatefulWidget {
 class _PokemonPictureBoxState extends State<PokemonPictureBook> {
   String pokemonImageURL =
       'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png';
+  String pokemonName = 'ピカチュウ';
 
-  Future<void> fetchPokemon(String pokemonName) async {
+  Future<void> fetchPokemon(String pokemon) async {
     final generalResponse =
-        await Dio().get('https://pokeapi.co/api/v2/pokemon/$pokemonName');
-    final speciesResponese = await Dio()
-        .get('https://pokeapi.co/api/v2/pokemon-species/$pokemonName');
+        await Dio().get('https://pokeapi.co/api/v2/pokemon/$pokemon');
+    final speciesResponese =
+        await Dio().get('https://pokeapi.co/api/v2/pokemon-species/$pokemon');
 
     final pokemonImage = PokemonImage.fromJson(generalResponse.data['sprites']);
+    final name = Name.fromJson(speciesResponese.data['names'][0]);
 
     pokemonImageURL = pokemonImage.imageURL ??
         'https://www.pokemoncenter-online.com/static/image/not_found/not_found_txt.jpg';
+
+    ///このNull安全処理はおそらく意味がない。
+    ///画像の時は901とかでnullが返るから意味があったが、名前の場合nullはなく、そもそもAPIが失敗する
+    ///もう一工夫必要と思われる
+    pokemonName = name.name ?? '';
     setState(() {});
   }
 
@@ -57,7 +65,7 @@ class _PokemonPictureBoxState extends State<PokemonPictureBook> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('ピカチュウ'),
+            Text(pokemonName),
             Image.network(pokemonImageURL),
             Text('しっぽを　たてて　まわりの\nようすを　さぐっていると　ときどき\nかみなりが　しっぽに　おちてくる。')
           ],
