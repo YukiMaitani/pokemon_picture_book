@@ -29,6 +29,8 @@ class _PokemonPictureBoxState extends State<PokemonPictureBook> {
   String pokemonImageURL =
       'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png';
   String pokemonName = 'ピカチュウ';
+  String pokemonDescription =
+      'しっぽを　たてて　まわりの\nようすを　さぐっていると　ときどき\nかみなりが　しっぽに　おちてくる。';
 
   Future<void> fetchPokemon(String pokemon) async {
     final generalResponse =
@@ -38,7 +40,17 @@ class _PokemonPictureBoxState extends State<PokemonPictureBook> {
 
     final pokemonImage = PokemonImage.fromJson(generalResponse.data['sprites']);
     final name = Name.fromJson(speciesResponese.data['names'][0]);
-
+    final flavor_text_entries_lists =
+        speciesResponese.data['flavor_text_entries'];
+    var index = 0;
+    for (var list in flavor_text_entries_lists) {
+      if (list['language']['name'] != 'ja') {
+        index += 1;
+      } else {
+        break;
+      }
+    }
+    pokemonDescription = flavor_text_entries_lists[index]['flavor_text'];
     pokemonImageURL = pokemonImage.imageURL ??
         'https://www.pokemoncenter-online.com/static/image/not_found/not_found_txt.jpg';
 
@@ -67,7 +79,7 @@ class _PokemonPictureBoxState extends State<PokemonPictureBook> {
           children: [
             Text(pokemonName),
             Image.network(pokemonImageURL),
-            Text('しっぽを　たてて　まわりの\nようすを　さぐっていると　ときどき\nかみなりが　しっぽに　おちてくる。')
+            Text(pokemonDescription)
           ],
         ),
       ),
